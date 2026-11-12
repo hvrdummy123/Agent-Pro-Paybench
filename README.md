@@ -23,10 +23,15 @@ paybench --version
 paybench demo --agent naive --task transfer_timeout_after_commit
 paybench validate
 paybench run --agent oracle --tasks core --out results/oracle_core
-paybench site --runs results/oracle_core --out site
+paybench run --agent naive --tasks core --out results/naive_core
+paybench site --runs results/oracle_core --runs results/naive_core --out site
 ```
 
-Open `site/index.html` for the baseline leaderboard.
+Open the interactive demos:
+
+- `site/playground.html` — **you** are the agent; survive `TIMEOUT_AFTER_COMMIT` without double-paying
+- `site/compare.html` — scrub Oracle vs Naive on the same task
+- `site/index.html` — baseline leaderboard
 
 ## What's in the benchmark
 

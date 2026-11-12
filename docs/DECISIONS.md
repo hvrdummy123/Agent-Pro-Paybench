@@ -15,3 +15,5 @@
 - **Optional LLM providers omitted from coverage**: anthropic/openai/google adapters need live SDKs; MockLLM is tested.
 - **P7 injection narrowed to sink match**: avoid false positives on legitimate transfers when notes mention "transfer".
 - **Cut deferred**: full mutation suite + rich episode HTML pages noted in REPORT; core Oracle/Naive gates kept.
+- **Playground is client-side JS**: static host can’t run the Python sim in-browser; playground faithfully models TIMEOUT_AFTER_COMMIT + idempotency for the headline task only.
+- **Compare page embeds live Oracle/Naive traces** at site-build time so the scrubber always shows real harness output.
