@@ -88,7 +88,8 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 
 [tool.ruff.lint.per-file-ignores]
 "src/paybench/tasks/catalog.py" = ["E501"]
-"src/paybench/cli.py" = ["B008"]
+"src/paybench/site/build.py" = ["E501"]
+"src/paybench/cli.py" = ["B008", "E501"]
 "tests/**" = ["E501"]
 
 [tool.mypy]
@@ -117,4 +118,7 @@ omit = [
   "src/paybench/site/*",
   "src/paybench/cli.py",
   "src/paybench/__main__.py",
+  "src/paybench/agents/providers/anthropic.py",
+  "src/paybench/agents/providers/openai.py",
+  "src/paybench/agents/providers/google.py",
 ]

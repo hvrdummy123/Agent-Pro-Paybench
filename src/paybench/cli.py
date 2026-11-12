@@ -66,24 +66,41 @@ def run_cmd(
     tasks: str = typer.Option("core", "--tasks", help="all|core|comma-ids"),
     trials: int = typer.Option(1, "--trials"),
     variants: int = typer.Option(1, "--variants"),
+    model: str | None = typer.Option(None, "--model", help="provider:model_id for --agent llm"),
+    max_cost_usd: float | None = typer.Option(None, "--max-cost-usd"),
     out: Path | None = typer.Option(None, "--out"),
 ) -> None:
     """Run agents on tasks and write JSONL results."""
     from paybench.agents import NaiveAgent, NullAgent, OracleAgent, RandomAgent
     from paybench.agents.base import Agent
+    from paybench.runner.cost import compute_cost_usd
     from paybench.runner.episode import run_episode
     from paybench.tasks.registry import all_tasks, core_tasks, get_task
 
-    agents: dict[str, Agent] = {
-        "oracle": OracleAgent(),
-        "null": NullAgent(),
-        "naive": NaiveAgent(),
-        "random": RandomAgent(),
-    }
-    if agent not in agents:
-        console.print(f"[red]Unknown agent {agent}[/red]")
-        raise typer.Exit(1)
-    ag = agents[agent]
+    if agent == "llm":
+        from paybench.agents.llm_loop import LLMAgent
+        from paybench.agents.providers import build_provider
+
+        if not model:
+            console.print("[red]--model provider:id required for --agent llm[/red]")
+            raise typer.Exit(1)
+        try:
+            provider = build_provider(model)
+        except Exception as exc:  # noqa: BLE001
+            console.print(f"[red]{exc}[/red]")
+            raise typer.Exit(1) from exc
+        ag: Agent = LLMAgent(provider=provider, model_key=model)
+    else:
+        agents: dict[str, Agent] = {
+            "oracle": OracleAgent(),
+            "null": NullAgent(),
+            "naive": NaiveAgent(),
+            "random": RandomAgent(),
+        }
+        if agent not in agents:
+            console.print(f"[red]Unknown agent {agent}[/red]")
+            raise typer.Exit(1)
+        ag = agents[agent]
     if tasks == "all":
         task_list = all_tasks()
     elif tasks == "core":
@@ -96,14 +113,27 @@ def run_cmd(
     path = out_dir / "episodes.jsonl"
     n_ok = 0
     n = 0
+    spend = 0.0
     with path.open("w", encoding="utf-8") as f:
         for t in task_list:
             for trial in range(trials):
                 for variant in range(variants):
                     ep = run_episode(t, ag, variant=variant, trial=trial)
+                    if model:
+                        tin = int(ep.get("tokens_in") or 0)
+                        tout = int(ep.get("tokens_out") or 0)
+                        cost, _ = compute_cost_usd(model, tokens_in=tin, tokens_out=tout)
+                        ep["cost_usd"] = cost
+                        spend += cost
                     f.write(json.dumps(ep) + "\n")
                     n += 1
                     n_ok += int(ep["success"])
+                    if max_cost_usd is not None and spend >= max_cost_usd:
+                        console.print(
+                            f"[yellow]Cost guard hit (${spend:.4f} >= {max_cost_usd})[/yellow]"
+                        )
+                        console.print(f"Wrote {path}  pass={n_ok}/{n}")
+                        raise typer.Exit(2)
     console.print(f"Wrote {path}  pass={n_ok}/{n}")
 
 
@@ -202,6 +232,54 @@ def play(task_id: str) -> None:
             console.print_json(json.dumps(result))
         except Exception as exc:  # noqa: BLE001
             console.print(f"[red]{exc}[/red]")
+
+
+@app.command("report")
+def report_cmd(
+    run_dir: Path,
+    k: int = typer.Option(3, "--k", help="Trials for pass^k metric."),
+) -> None:
+    """Summarize a run directory and print a Markdown table."""
+    import json
+
+    from paybench.analysis.metrics import summarize
+    from paybench.analysis.report import render_markdown
+    from paybench.runner.cost import has_placeholder_prices
+
+    path = run_dir / "episodes.jsonl"
+    if not path.is_file():
+        console.print(f"[red]Missing {path}[/red]")
+        raise typer.Exit(1)
+    lines = path.read_text(encoding="utf-8").splitlines()
+    episodes = [json.loads(line) for line in lines if line.strip()]
+    summary = summarize(episodes, k=k)
+    md = render_markdown(summary)
+    out_md = run_dir / "summary.md"
+    out_json = run_dir / "summary.json"
+    out_md.write_text(md, encoding="utf-8")
+    out_json.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    if has_placeholder_prices():
+        console.print(
+            "[bold yellow]WARNING:[/bold yellow] pricing.yaml still contains # VERIFY placeholders."
+        )
+    console.print(md)
+    console.print(f"\nWrote {out_md} and {out_json}")
+
+
+@app.command("site")
+def site_cmd(
+    runs: list[Path] = typer.Option(..., "--runs", help="Run dirs containing episodes.jsonl"),
+    out: Path = typer.Option(Path("site"), "--out", help="Output directory for static HTML"),
+) -> None:
+    """Build static leaderboard site from one or more runs."""
+    from paybench.site.build import build_site
+
+    missing = [p for p in runs if not (p / "episodes.jsonl").is_file()]
+    if missing:
+        console.print(f"[red]No episodes.jsonl in: {', '.join(str(p) for p in missing)}[/red]")
+        raise typer.Exit(1)
+    build_site(runs, out)
+    console.print(f"Wrote site to {out.resolve()}")
 
 
 if __name__ == "__main__":

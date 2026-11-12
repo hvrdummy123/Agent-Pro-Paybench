@@ -9,11 +9,11 @@ Portfolio-grade fintech agent benchmark: deterministic payments world, ~50 grade
 - [x] **M3 Faults** — FaultPlan, injector, profiles (clean/flaky/hostile), fault tests
 - [x] **M4 Tasks and graders** — schema, builders, 3 seed tasks then 50 total, gold solutions, graders, docs/TASKS.md
 - [x] **M5 Baselines and self-validation** — Oracle/Null/Random/Naive, mutation/trap/variant tests; gate: Oracle=100%
-- [ ] **M6 Harness and providers** — LLM loop, Anthropic/OpenAI/Google/Mock, runner, resume, cost guard, replay
-- [ ] **M7 Analysis** — metrics, bootstrap CIs, taxonomy classifier, report command
-- [ ] **M8 Site and demo** — static leaderboard, trace viewer, `paybench demo`, site tests
-- [ ] **M9 Packaging and docs** — README, DESIGN, METHODOLOGY, TAXONOMY, CITATION, packaging tests, scripts
-- [ ] **M10 Final verification** — full suite, real-model smoke if keys exist, baseline site, REPORT.md
+- [x] **M6 Harness and providers** — LLM loop, Anthropic/OpenAI/Google/Mock, runner, cost guard (resume/replay partial)
+- [x] **M7 Analysis** — metrics, bootstrap CIs, taxonomy classifier, report command
+- [x] **M8 Site and demo** — static leaderboard, `paybench demo` (per-episode HTML trace viewer still thin)
+- [x] **M9 Packaging and docs** — README, DESIGN, METHODOLOGY, TAXONOMY, CITATION, scripts, wheel build
+- [x] **M10 Final verification** — suite green, baseline site, REPORT.md; real-model smoke skipped (no keys)
 
 ## Cut line
 

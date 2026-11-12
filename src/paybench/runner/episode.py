@@ -50,6 +50,9 @@ def run_episode(
     result: AgentResult = agent.run(ctx)
     g: GradeResult = grade(world, task)
     return {
+        "tokens_in": int(ctx.metadata.get("tokens_in") or 0),
+        "tokens_out": int(ctx.metadata.get("tokens_out") or 0),
+        "model_key": ctx.metadata.get("model_key"),
         "task_id": task.id,
         "category": task.category.value,
         "difficulty": task.difficulty.value,

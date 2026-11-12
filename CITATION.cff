@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+title: PayBench
+message: If you use PayBench, please cite it.
+type: software
+authors:
+  - family-names: Contributors
+    given-names: PayBench
+abstract: >-
+  PayBench is a deterministic fintech agent benchmark for payments
+  back-office operations, with fault injection, policy grading, and
+  a failure taxonomy.
+license: Apache-2.0
+version: 0.1.0
+date-released: "2026-11-12"

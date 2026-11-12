@@ -12,3 +12,6 @@
 - **Master prompt kept as `paybench_agent_prompt.md`**: reference for build; not published as package data.
 - **Coverage omit cli/__main__ until harness lands**: keep overall gate at 80%; sim modules still heavily tested.
 - **P9 detector uses log order, not step ids**: avoids false negatives when synthetic log steps are inserted in tests.
+- **Optional LLM providers omitted from coverage**: anthropic/openai/google adapters need live SDKs; MockLLM is tested.
+- **P7 injection narrowed to sink match**: avoid false positives on legitimate transfers when notes mention "transfer".
+- **Cut deferred**: full mutation suite + rich episode HTML pages noted in REPORT; core Oracle/Naive gates kept.
