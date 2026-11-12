@@ -16,7 +16,7 @@ htmlcov/
 .hypothesis/
 results/*
 !results/.gitkeep
-site/
+/site/
 *.log
 .DS_Store
 .python-version
