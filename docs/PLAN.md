@@ -7,8 +7,8 @@ Portfolio-grade fintech agent benchmark: deterministic payments world, ~50 grade
 - [x] **M1 Foundations** — repo, pyproject, CI skeleton, Money, Clock, Rng, ids, World, ledger + tests
 - [x] **M2 Tools and policy** — all tools, idempotency, policy text + rule engine, unit/property tests
 - [x] **M3 Faults** — FaultPlan, injector, profiles (clean/flaky/hostile), fault tests
-- [ ] **M4 Tasks and graders** — schema, builders, 3 seed tasks then 50 total, gold solutions, graders, docs/TASKS.md
-- [ ] **M5 Baselines and self-validation** — Oracle/Null/Random/Naive, mutation/trap/variant tests; gate: Oracle=100%
+- [x] **M4 Tasks and graders** — schema, builders, 3 seed tasks then 50 total, gold solutions, graders, docs/TASKS.md
+- [x] **M5 Baselines and self-validation** — Oracle/Null/Random/Naive, mutation/trap/variant tests; gate: Oracle=100%
 - [ ] **M6 Harness and providers** — LLM loop, Anthropic/OpenAI/Google/Mock, runner, resume, cost guard, replay
 - [ ] **M7 Analysis** — metrics, bootstrap CIs, taxonomy classifier, report command
 - [ ] **M8 Site and demo** — static leaderboard, trace viewer, `paybench demo`, site tests
