@@ -404,8 +404,7 @@ def check_p9(world: World, case_log: list[CaseLogEntry]) -> list[Violation]:
                 "idempotency_key"
             ) == prev.args.get("idempotency_key")
             checked = any(
-                x.tool
-                in ("list_transfers", "get_payment", "list_payments", "get_account")
+                x.tool in ("list_transfers", "get_payment", "list_payments", "get_account")
                 for x in case_log[prev_i + 1 : i]
             )
             if not same_key and not checked and e.result.get("ok"):

@@ -70,6 +70,7 @@ class World:
     fx_rates: dict[str, str] = field(default_factory=dict)
     planted: dict[str, Any] = field(default_factory=dict)
     customer_facts: dict[str, str] = field(default_factory=dict)
+    fault_plan: Any = None  # FaultPlan | None; typed loosely to avoid cycle
 
     def __post_init__(self) -> None:
         self.rng = Rng(seed=self.seed)
@@ -205,3 +206,4 @@ class World:
         self.fx_rates = snap.fx_rates
         self.planted = snap.planted
         self.customer_facts = snap.customer_facts
+        self.fault_plan = snap.fault_plan
