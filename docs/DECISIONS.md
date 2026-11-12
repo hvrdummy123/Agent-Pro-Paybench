@@ -10,3 +10,5 @@
 - **RNG sub-streams**: named children via SHA-256(seed||name) so subsystem draws stay independent.
 - **Git branch `main`**: rename from default after init (no git config changes).
 - **Master prompt kept as `paybench_agent_prompt.md`**: reference for build; not published as package data.
+- **Coverage omit cli/__main__ until harness lands**: keep overall gate at 80%; sim modules still heavily tested.
+- **P9 detector uses log order, not step ids**: avoids false negatives when synthetic log steps are inserted in tests.

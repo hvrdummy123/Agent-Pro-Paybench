@@ -5,7 +5,7 @@ Portfolio-grade fintech agent benchmark: deterministic payments world, ~50 grade
 ## Milestones
 
 - [x] **M1 Foundations** — repo, pyproject, CI skeleton, Money, Clock, Rng, ids, World, ledger + tests
-- [ ] **M2 Tools and policy** — all tools, idempotency, policy text + rule engine, unit/property tests
+- [x] **M2 Tools and policy** — all tools, idempotency, policy text + rule engine, unit/property tests
 - [ ] **M3 Faults** — FaultPlan, injector, profiles (clean/flaky/hostile), fault tests
 - [ ] **M4 Tasks and graders** — schema, builders, 3 seed tasks then 50 total, gold solutions, graders, docs/TASKS.md
 - [ ] **M5 Baselines and self-validation** — Oracle/Null/Random/Naive, mutation/trap/variant tests; gate: Oracle=100%

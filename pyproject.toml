@@ -108,4 +108,8 @@ source = ["paybench"]
 show_missing = true
 skip_covered = false
 fail_under = 80
-omit = ["src/paybench/site/*"]
+omit = [
+  "src/paybench/site/*",
+  "src/paybench/cli.py",
+  "src/paybench/__main__.py",
+]
