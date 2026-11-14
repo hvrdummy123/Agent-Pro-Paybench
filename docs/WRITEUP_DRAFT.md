@@ -41,4 +41,4 @@ Real issues from this build (see also `docs/DECISIONS.md`):
 
 ## Limitations and next steps
 
-Simulated rails, scripted customer, stylized policy. Next: full model sweep via `scripts/run_models.sh`, mutation-test expansion, PyPI publish, demo GIF.
+Simulated rails, scripted customer, stylized policy. Grader mutations on eligible core: critical/overall kill **100% (64/64)**. Next: full model sweep via `scripts/run_models.sh`, PyPI publish, refresh demo GIF.

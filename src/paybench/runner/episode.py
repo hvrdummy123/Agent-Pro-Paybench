@@ -31,6 +31,7 @@ def run_episode(
     *,
     variant: int = 0,
     trial: int = 0,
+    verbose: bool = False,
 ) -> dict[str, Any]:
     world = instantiate_world(task, variant=variant)
     system = load_system_prompt()
@@ -45,7 +46,12 @@ def run_episode(
         tool_specs=REGISTRY.specs(),
         call_tool=_call,
         max_steps=task.max_steps,
-        metadata={"world": world, "variant": variant, "trial": trial},
+        metadata={
+            "world": world,
+            "variant": variant,
+            "trial": trial,
+            "verbose": verbose,
+        },
     )
     result: AgentResult = agent.run(ctx)
     g: GradeResult = grade(world, task)

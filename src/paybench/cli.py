@@ -69,6 +69,9 @@ def run_cmd(
     model: str | None = typer.Option(None, "--model", help="provider:model_id for --agent llm"),
     max_cost_usd: float | None = typer.Option(None, "--max-cost-usd"),
     out: Path | None = typer.Option(None, "--out"),
+    verbose: bool = typer.Option(
+        False, "--verbose", "-v", help="Print per-turn LLM/tool progress"
+    ),
 ) -> None:
     """Run agents on tasks and write JSONL results."""
     from paybench.agents import NaiveAgent, NullAgent, OracleAgent, RandomAgent
@@ -114,11 +117,22 @@ def run_cmd(
     n_ok = 0
     n = 0
     spend = 0.0
+    total = len(task_list) * trials * variants
+    console.print(
+        f"Running {total} episode(s) → {path}"
+        + (" (verbose)" if verbose else " (add -v for live turns)")
+    )
     with path.open("w", encoding="utf-8") as f:
         for t in task_list:
             for trial in range(trials):
                 for variant in range(variants):
-                    ep = run_episode(t, ag, variant=variant, trial=trial)
+                    console.print(
+                        f"[{n + 1}/{total}] {t.id} trial={trial} variant={variant} …",
+                        end="\n",
+                    )
+                    ep = run_episode(
+                        t, ag, variant=variant, trial=trial, verbose=verbose
+                    )
                     if model:
                         tin = int(ep.get("tokens_in") or 0)
                         tout = int(ep.get("tokens_out") or 0)
@@ -126,9 +140,21 @@ def run_cmd(
                         ep["cost_usd"] = cost
                         spend += cost
                     f.write(json.dumps(ep) + "\n")
+                    f.flush()
                     n += 1
                     n_ok += int(ep["success"])
-                    if max_cost_usd is not None and spend >= max_cost_usd:
+                    console.print(
+                        f"  → {'PASS' if ep['success'] else 'FAIL'}"
+                        f" steps={ep.get('steps')} "
+                        f"err={ep.get('agent_error') or '—'}"
+                    )
+                    # Treat 0/None as "no guard". A zero cap used to abort after the
+                    # first episode whenever priced cost stayed $0 (common for free tiers).
+                    if (
+                        max_cost_usd is not None
+                        and max_cost_usd > 0
+                        and spend >= max_cost_usd
+                    ):
                         console.print(
                             f"[yellow]Cost guard hit (${spend:.4f} >= {max_cost_usd})[/yellow]"
                         )
@@ -180,10 +206,11 @@ def demo(
 
 @app.command("validate")
 def validate() -> None:
-    """Quick self-validation: Oracle=100%, Naive fails traps."""
+    """Self-validation: Oracle=100%, Naive fails traps, grader mutation kill rates."""
     from paybench.agents import NaiveAgent, OracleAgent
     from paybench.runner.episode import run_episode
-    from paybench.tasks.registry import all_tasks
+    from paybench.tasks.mutations import run_mutation_suite
+    from paybench.tasks.registry import all_tasks, core_tasks
 
     oracle_fail = [t.id for t in all_tasks() if not run_episode(t, OracleAgent())["success"]]
     naive_pass = [
@@ -191,6 +218,8 @@ def validate() -> None:
         for t in all_tasks()
         if t.category.value in ("adversarial", "faults") and run_episode(t, NaiveAgent())["success"]
     ]
+    mut = run_mutation_suite(core_tasks())
+    mut_ok = mut["critical_kill_rate"] >= 1.0 and mut["overall_kill_rate"] >= 0.95
     table = Table(title="Self-validation")
     table.add_column("check")
     table.add_column("result")
@@ -199,8 +228,18 @@ def validate() -> None:
         "Naive fails adv/faults",
         "PASS" if not naive_pass else f"FAIL {naive_pass}",
     )
+    table.add_row(
+        "Mutation kill rate",
+        (
+            f"PASS critical={mut['critical_kill_rate']:.0%} "
+            f"overall={mut['overall_kill_rate']:.0%} "
+            f"({mut['n_killed']}/{mut['n_applicable']})"
+            if mut_ok
+            else f"FAIL survivors={mut['survivors'][:5]}"
+        ),
+    )
     console.print(table)
-    if oracle_fail or naive_pass:
+    if oracle_fail or naive_pass or not mut_ok:
         raise typer.Exit(1)
 
 

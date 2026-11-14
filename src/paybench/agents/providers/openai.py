@@ -49,8 +49,8 @@ class OpenAIProvider:
                         "content": str(m.get("content") or ""),
                     }
                 )
-            elif role == "assistant" and m.get("tool_call"):
-                tc = m["tool_call"]
+            elif role == "assistant" and (m.get("tool_calls") or m.get("tool_call")):
+                tcs = list(m.get("tool_calls") or [m["tool_call"]])
                 converted.append(
                     {
                         "role": "assistant",
@@ -64,6 +64,7 @@ class OpenAIProvider:
                                     "arguments": json.dumps(tc.get("arguments") or {}),
                                 },
                             }
+                            for tc in tcs
                         ],
                     }
                 )

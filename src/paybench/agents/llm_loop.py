@@ -45,6 +45,12 @@ def run_llm_loop(
     max_tokens: int = 32_000,
     model_key: str = "mock:mock",
 ) -> AgentResult:
+    verbose = bool(ctx.metadata.get("verbose"))
+
+    def _v(msg: str) -> None:
+        if verbose:
+            print(msg, flush=True)
+
     messages: list[dict[str, Any]] = [
         {"role": "system", "content": ctx.system_prompt},
         {"role": "user", "content": ctx.user_message},
@@ -67,14 +73,26 @@ def run_llm_loop(
         if tokens_in + tokens_out >= max_tokens:
             error = "token budget exceeded"
             break
-        turn = provider.complete(messages, tools_json)
+        _v(f"  llm turn {steps}: calling model…")
+        try:
+            turn = provider.complete(messages, tools_json)
+        except Exception as exc:  # noqa: BLE001
+            error = f"provider error: {type(exc).__name__}: {exc}"
+            _v(f"  {error}")
+            break
         tokens_in += int(turn.get("tokens_in") or 0)
         tokens_out += int(turn.get("tokens_out") or 0)
         tool_calls = turn.get("tool_calls") or []
         if not tool_calls:
             if turn.get("stop"):
                 error = error or "provider stopped without tool calls"
+            _v("  model returned no tool calls; stopping")
             break
+        # Execute all tool calls from this model turn, then append history as
+        # one assistant message (all calls) + one tool message each — providers
+        # like Gemini 3 need parallel functionCall parts kept together with
+        # thought_signature on the first call.
+        executed: list[tuple[dict[str, Any], dict[str, Any]]] = []
         for tc in tool_calls:
             name = str(tc.get("name", ""))
             args = tc.get("arguments") or {}
@@ -83,18 +101,39 @@ def run_llm_loop(
                     args = json.loads(args)
                 except json.JSONDecodeError:
                     args = {}
+            _v(f"  → {name}({json.dumps(args)[:120]})")
             result = ctx.call_tool(name, dict(args))
+            ok = bool(result.get("ok")) if isinstance(result, dict) else False
+            _v(f"    {'ok' if ok else 'err'}")
+            call_meta = {
+                "name": name,
+                "arguments": args,
+                "id": tc.get("id") or name,
+            }
+            if "thought_signature" in tc:
+                call_meta["thought_signature"] = tc["thought_signature"]
+            executed.append((call_meta, result))
+            if name == "finish" and result.get("ok"):
+                finished = True
+                break
+        if executed:
             messages.append(
                 {
                     "role": "assistant",
                     "content": "",
-                    "tool_call": {"name": name, "arguments": args},
+                    "tool_calls": [c for c, _ in executed],
+                    # Back-compat for providers that still read singular tool_call
+                    "tool_call": executed[0][0],
                 }
             )
-            messages.append({"role": "tool", "name": name, "content": json.dumps(result)})
-            if name == "finish" and result.get("ok"):
-                finished = True
-                break
+            for call_meta, result in executed:
+                messages.append(
+                    {
+                        "role": "tool",
+                        "name": call_meta["name"],
+                        "content": json.dumps(result),
+                    }
+                )
         if finished:
             break
         if turn.get("stop"):

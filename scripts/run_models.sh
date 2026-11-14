@@ -7,7 +7,7 @@ set -euo pipefail
 MODELS=(
   "anthropic:claude-haiku-4-5-20251001"
   "openai:gpt-4o-mini"
-  "google:gemini-2.0-flash"
+  "google:gemini-3.8-flash"
 )
 
 MAX_COST_USD="${MAX_COST_USD:-25}"

@@ -53,8 +53,8 @@ paybench run --agent llm --model anthropic:claude-haiku-4-5-20251001 \
 See `docs/DECISIONS.md`. Notable:
 
 - Optional provider modules omitted from coverage totals (require live SDKs/keys).
-- Mutation-test suite (grader mutants a–g) and full packaging venv install test are **not fully automated yet** — Oracle/Naive gates + unit/property/fault tests are green; expand mutation suite next.
-- Replay CLI and full episode HTML trace pages are partial vs the master prompt (leaderboard + failures + tasks + methodology ship).
+- Grader mutation suite (a–g) is automated on eligible core tasks: **critical=100%, overall=100% (64/64)**, survivors none — see README validation section and `tests/graders/test_mutations.py`.
+- Full packaging clean-venv install test and deeper per-episode HTML trace pages remain partial vs the master prompt (leaderboard + playground + compare + failures + tasks + methodology ship).
 
 ## Known limitations
 
@@ -67,5 +67,5 @@ See `docs/DECISIONS.md`. Notable:
 1. Run `docs/HUMAN_TEST.md`.
 2. Set API keys and run `./scripts/run_models.sh`.
 3. Publish wheel to PyPI; deploy `site/` to GitHub Pages.
-4. Record a demo GIF of `paybench demo --agent naive --task transfer_timeout_after_commit`.
-5. Flesh remaining mutation tests and per-episode HTML trace viewer.
+4. ~~Demo GIF~~ — `docs/assets/demo.gif` (playground safe path + Oracle vs Naive scrub).
+5. Extend mutation eligibility beyond strong-required core tasks; deepen per-episode HTML trace viewer.

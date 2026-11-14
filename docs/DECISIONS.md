@@ -14,6 +14,7 @@
 - **P9 detector uses log order, not step ids**: avoids false negatives when synthetic log steps are inserted in tests.
 - **Optional LLM providers omitted from coverage**: anthropic/openai/google adapters need live SDKs; MockLLM is tested.
 - **P7 injection narrowed to sink match**: avoid false positives on legitimate transfers when notes mention "transfer".
-- **Cut deferred**: full mutation suite + rich episode HTML pages noted in REPORT; core Oracle/Naive gates kept.
+- **Mutation suite**: kill-rate targets measured on *eligible* core tasks (strong required checkpoints), not every soft-required lookup. Weak mutators (ungated order-swap; PII text that does not match planted email/DOB) were tightened so critical kill rate is falsifiable at 100%.
+- **Cut deferred**: richer per-episode HTML pages; packaging clean-venv; mutation eligibility for the full 50-task catalog.
 - **Playground is client-side JS**: static host can’t run the Python sim in-browser; playground faithfully models TIMEOUT_AFTER_COMMIT + idempotency for the headline task only.
 - **Compare page embeds live Oracle/Naive traces** at site-build time so the scrubber always shows real harness output.

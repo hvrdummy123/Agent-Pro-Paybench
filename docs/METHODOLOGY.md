@@ -25,6 +25,16 @@ Written policy (`get_policy`) is machine-checked post hoc (`P1`–`P9` plus ledg
 
 Oracle replays gold traces (expect 100% pass). Null, Random, and Naive baselines anchor the floor and trap coverage. Property tests and grader mutation checks guard scoring drift.
 
+### Grader mutation tests (real run)
+
+On **13 eligible core tasks** (required set includes a strong state checkpoint), gold traces are corrupted with mutations (a)–(g). Applicable mutants: **64**. Kill rates from `paybench validate` / `pytest tests/graders/test_mutations.py`:
+
+- **Critical (a)–(e),(g): 100%**
+- **Overall (incl. f): 100% (64/64)**
+- **Survivors: none**
+
+Mutators that cannot apply to a task (e.g. order-swap without an ordering gate) are marked N/A and excluded from the rate.
+
 ## Reproducibility
 
 Each run writes `episodes.jsonl` with full traces, `prompt_version`, seeds, and `state_hash`. Re-execute tool calls on a fresh world to verify the hash matches.

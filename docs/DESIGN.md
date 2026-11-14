@@ -1,5 +1,7 @@
 # PayBench Design
 
+> Full writeup: **[`ARCHITECTURE.md`](ARCHITECTURE.md)** — problem statement, component design, why these choices, advantages, limitations, and improvement roadmap.
+
 ## Pitch
 
 PayBench is a **simulated, deterministic payments world** that measures whether LLM agents can safely operate a payments back office: lookups, refunds, transfers, disputes, policy compliance, and recovery from ambiguous API faults — without following prompt injections.

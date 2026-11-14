@@ -389,7 +389,9 @@ def _methodology_html(repo_root: Path) -> str:
     # Minimal markdown → HTML (headings and paragraphs only)
     blocks: list[str] = []
     for line in text.splitlines():
-        if line.startswith("## "):
+        if line.startswith("### "):
+            blocks.append(f"<h3>{line[4:]}</h3>")
+        elif line.startswith("## "):
             blocks.append(f"<h2>{line[3:]}</h2>")
         elif line.startswith("# "):
             continue
